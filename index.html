@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System Reboot: Peace Treaty</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono for subtle tech accents -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            cream: '#FDF8F5',
+            blush: '#F3E8FF',
+            roseSoft: '#C084FC',
+            roseDeep: '#9333EA',
+            indigoSoft: '#4A5568',
+            indigoDeep: '#2D3748',
+            sage: '#9333EA',
+          },
+          animation: {
+            'float-slow': 'float 4s ease-in-out infinite',
+            'float-med': 'float 3.2s ease-in-out infinite',
+            'float-fast': 'float 2.8s ease-in-out infinite',
+            'pulse-soft': 'pulseSoft 2.5s ease-in-out infinite',
+            'pop-in': 'popIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'shake': 'shake 0.45s cubic-bezier(.36,.07,.19,.97) both',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            pulseSoft: {
+              '0%, 100%': { opacity: 1 },
+              '50%': { opacity: 0.65 },
+            },
+            popIn: {
+              '0%': { opacity: 0, transform: 'scale(0.92) translateY(12px)' },
+              '100%': { opacity: 1, transform: 'scale(1) translateY(0)' },
+            },
+            shake: {
+              '10%, 90%': { transform: 'translate3d(-2px, 0, 0)' },
+              '20%, 80%': { transform: 'translate3d(4px, 0, 0)' },
+              '30%, 50%, 70%': { transform: 'translate3d(-6px, 0, 0)' },
+              '40%, 60%': { transform: 'translate3d(6px, 0, 0)' },
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Custom subtle animations and confetti/heart particles */
+    body {
+      background: radial-gradient(circle at top left, #2E1065 0%, #1E1B4B 48%, #0F172A 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Make native date/time picker icons visible on dark purple inputs */
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.85) sepia(0.3) saturate(3) hue-rotate(235deg);
+      cursor: pointer;
+    }
+
+    .glass-card {
+      background: rgba(24, 20, 44, 0.86);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(192, 132, 252, 0.28);
+      box-shadow: 0 24px 50px -12px rgba(88, 28, 135, 0.45);
+    }
+
+    .bug-node {
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, background-color 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    .bug-node:hover {
+      transform: scale(1.06);
+    }
+
+    .bug-node:active {
+      transform: scale(0.94);
+    }
+
+    .bug-cleared {
+      transform: scale(0.8);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Confetti / Floating Hearts Layer */
+    #celebration-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    /* Hide scrollbars cleanly where needed */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="font-sans text-purple-50 antialiased selection:bg-purple-500/30 selection:text-purple-200 flex flex-col items-center justify-between p-4 sm:p-6">
+
+  <!-- Celebration Canvas for Confetti & Floating Hearts -->
+  <canvas id="celebration-canvas"></canvas>
+
+  <!-- Top Utility Bar (Hidden in Screenshot / Clean View Mode) -->
+  <header id="top-bar" class="w-full max-w-xl flex items-center justify-between gap-2 mb-4 transition-opacity duration-300">
+    <div class="flex items-center gap-2 bg-purple-950/75 px-3 py-1.5 rounded-full border border-purple-400/30 shadow-sm">
+      <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+      <span id="status-label" class="font-mono text-xs font-medium text-purple-200 tracking-tight">STATUS: GLITCHED</span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button
+        id="btn-screenshot-mode"
+        type="button"
+        onclick="toggleScreenshotMode()"
+        class="text-xs font-medium bg-purple-950/80 hover:bg-purple-900/90 text-purple-100 px-3 py-1.5 rounded-full border border-purple-400/30 shadow-sm transition flex items-center gap-1.5"
+        title="Toggle clean view for taking a screenshot"
+      >
+        <svg class="w-3.5 h-3.5 text-purple-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span id="screenshot-btn-text">Clean View</span>
+      </button>
+
+      <button
+        id="btn-copy-message"
+        type="button"
+        onclick="copyApologySummary()"
+        class="text-xs font-medium bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-full shadow-sm shadow-purple-900/50 transition flex items-center gap-1.5"
+        title="Copy apology text to paste into WhatsApp/iMessage"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+        <span id="copy-btn-text">Copy Note</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Floating Banner to Exit Clean View when active -->
+  <div id="clean-view-exit" class="hidden fixed top-3 right-3 z-40">
+    <button
+      type="button"
+      onclick="toggleScreenshotMode()"
+      class="text-xs font-medium bg-purple-950/85 hover:bg-purple-900 text-purple-100 border border-purple-400/30 px-3 py-1.5 rounded-full backdrop-blur-md shadow-md transition"
+    >
+      Exit Clean View
+    </button>
+  </div>
+
+  <!-- Toast Notification (Replaces alert()) -->
+  <div
+    id="toast-banner"
+    class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 translate-y-2"
+  >
+    <div class="bg-purple-950 border border-purple-400/40 text-purple-50 text-xs sm:text-sm font-medium px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2">
+      <span class="text-purple-300">💜</span>
+      <span id="toast-text">Copied to clipboard!</span>
+    </div>
+  </div>
+
+  <!-- MAIN INTERACTIVE CONTAINER -->
+  <main class="w-full max-w-xl my-auto">
+
+    <!-- Step Progress Indicator -->
+    <div id="step-indicator" class="flex items-center justify-center gap-2 mb-5">
+      <div id="pip-1" class="h-1.5 w-10 rounded-full bg-purple-500 transition-all duration-300"></div>
+      <div id="pip-2" class="h-1.5 w-10 rounded-full bg-purple-950/80 transition-all duration-300"></div>
+      <div id="pip-3" class="h-1.5 w-10 rounded-full bg-purple-950/80 transition-all duration-300"></div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- STAGE 1: STUBBORNNESS FIREWALL DETECTED (MINI-GAME)       -->
+    <!-- ========================================================= -->
+    <section id="stage-1" class="glass-card rounded-3xl p-6 sm:p-8 animate-pop-in">
+      <!-- Tech Header Badge -->
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-200 font-mono text-xs font-medium mb-4">
+        <span>⚠️ SYSTEM ALERT // ERROR 409</span>
+      </div>
+
+      <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">
+        Stubbornness Firewall Detected
+      </h1>
+      <p class="text-sm sm:text-base text-purple-200/85 leading-relaxed mb-5">
+        <span class="font-semibold text-white">Connection Status:</span> Temporarily glitched over a silly thing. Tap each stubbornness bug below to clear the clutter and unlock my message for you.
+      </p>
+
+      <!-- Progress Bar for Mini-Game -->
+      <div class="bg-purple-950/70 rounded-2xl p-3.5 mb-5 border border-purple-400/25">
+        <div class="flex items-center justify-between text-xs font-mono text-purple-300 mb-2">
+          <span>DEBUGGING PRIDE.EXE</span>
+          <span id="bug-counter" class="font-semibold text-purple-300">0 / 5 CLEARED</span>
+        </div>
+        <div class="w-full h-2.5 bg-purple-950 rounded-full overflow-hidden border border-purple-500/20">
+          <div id="bug-progress-bar" class="h-full bg-gradient-to-r from-violet-400 via-purple-500 to-fuchsia-500 rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(168,85,247,0.7)]" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Interactive Bubbles / Nodes Arena -->
+      <div id="bugs-arena" class="relative min-h-[250px] sm:min-h-[260px] rounded-2xl bg-gradient-to-b from-purple-950/50 to-indigo-950/60 border border-purple-400/25 p-4 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+        <!-- Populated dynamically via JS -->
+      </div>
+
+      <!-- Revealed Honest Thoughts Log -->
+      <div id="thoughts-reveal-box" class="mt-5 min-h-[56px] rounded-2xl bg-purple-950/60 border border-purple-400/25 p-3.5 flex items-center justify-center text-center transition-all">
+        <p id="latest-thought-text" class="text-xs sm:text-sm font-medium text-purple-200">
+          👆 Tap any floating bubble above to pop it!
+        </p>
+      </div>
+
+      <!-- Unlock Button (Appears once all 5 bugs are popped) -->
+      <div id="stage-1-complete" class="hidden mt-5 text-center animate-pop-in">
+        <button
+          type="button"
+          onclick="goToStage(2)"
+          class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-semibold text-sm sm:text-base shadow-lg shadow-purple-900/60 transition transform active:scale-[0.98] flex items-center justify-center gap-2"
+        >
+          <span>Firewall Cleared! Open Sincere Note</span>
+          <span>→</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- STAGE 2: THE SINCERE APOLOGY NOTE & PEACE VOUCHER         -->
+    <!-- ========================================================= -->
+    <section id="stage-2" class="hidden glass-card rounded-3xl p-6 sm:p-8">
+      <div class="flex items-center justify-between gap-2 mb-4">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-200 font-mono text-xs font-medium">
+          💌 PATCH_NOTES_V2.0
+        </span>
+
+        <!-- Subtle Edit Toggle for Her to Personalize -->
+        <button
+          id="btn-toggle-edit"
+          type="button"
+          onclick="toggleEditMode()"
+          class="text-xs font-medium px-3 py-1.5 rounded-full bg-purple-900/70 hover:bg-purple-800 text-purple-100 border border-purple-400/30 transition flex items-center gap-1.5"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+          <span id="edit-toggle-label">Edit Message</span>
+        </button>
+      </div>
+
+      <!-- Greeting Header (Read & Edit views) -->
+      <div class="mb-3">
+        <h2 id="display-greeting" class="text-xl sm:text-2xl font-bold text-white">
+          Hey Donkey, I’m really sorry. 💜
+        </h2>
+        <input
+          id="input-greeting"
+          type="text"
+          value="Hey Donkey, I’m really sorry. 💜"
+          class="hidden w-full text-lg sm:text-xl font-bold text-white bg-purple-950/90 border border-purple-400/50 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          placeholder="Greeting (e.g., Hey Donkey, I'm really sorry.)"
+        />
+      </div>
+
+      <!-- Main Heartfelt Message Card -->
+      <div class="rounded-2xl bg-purple-950/65 border border-purple-400/25 p-4 sm:p-5 shadow-inner mb-5">
+        <p id="display-message" class="text-sm sm:text-base text-purple-100 leading-relaxed whitespace-pre-line">I’ve been thinking about our argument, and I want to own my part completely. You tried so hard to bring us together and smooth things over, and instead of meeting you halfway, I let my stubbornness take over and turned something silly into a real fight.
+
+You didn’t deserve that frustration, especially when all you wanted was peace between us. You mean infinitely more to me than my pride or winning an argument. I’m truly sorry.</p>
+
+        <textarea
+          id="input-message"
+          rows="6"
+          class="hidden w-full text-sm sm:text-base text-purple-100 leading-relaxed bg-purple-950/90 border border-purple-400/50 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+        >I’ve been thinking about our argument, and I want to own my part completely. You tried so hard to bring us together and smooth things over, and instead of meeting you halfway, I let my stubbornness take over and turned something silly into a real fight.
+
+You didn’t deserve that frustration, especially when all you wanted was peace between us. You mean infinitely more to me than my pride or winning an argument. I’m truly sorry.</textarea>
+      </div>
+
+      <!-- Peace Offering Voucher Selector -->
+      <div class="mb-5">
+        <div class="flex items-center justify-between mb-2.5">
+          <label class="text-xs font-mono font-semibold uppercase tracking-wider text-purple-300">
+            🎟️ Select Your Peace Offering Voucher
+          </label>
+          <span class="text-xs text-purple-300/70">Pick 1 treat</span>
+        </div>
+
+        <div id="voucher-options" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
+          <button
+            type="button"
+            onclick="selectVoucher(this, 'Treat of Ur Choice 🍔')"
+            class="voucher-btn active-voucher text-left p-3 rounded-2xl border-2 border-purple-400 bg-purple-600/35 text-white text-xs sm:text-sm font-medium transition flex items-center justify-between shadow-sm shadow-purple-900/40"
+          >
+            <span>🍔 Treat of Ur Choice</span>
+            <span class="check-icon text-purple-300 font-bold">✓</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="selectVoucher(this, 'Long Hug 🫂')"
+            class="voucher-btn text-left p-3 rounded-2xl border border-purple-400/25 bg-purple-950/60 hover:border-purple-400/60 text-purple-100 text-xs sm:text-sm font-medium transition flex items-center justify-between"
+          >
+            <span>🫂 Long Hug</span>
+            <span class="check-icon hidden text-purple-300 font-bold">✓</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="selectVoucher(this, '1000 Kisses 😘')"
+            class="voucher-btn text-left p-3 rounded-2xl border border-purple-400/25 bg-purple-950/60 hover:border-purple-400/60 text-purple-100 text-xs sm:text-sm font-medium transition flex items-center justify-between"
+          >
+            <span>😘 1000 Kisses</span>
+            <span class="check-icon hidden text-purple-300 font-bold">✓</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="selectVoucher(this, 'Apology Letter 💌')"
+            class="voucher-btn text-left p-3 rounded-2xl border border-purple-400/25 bg-purple-950/60 hover:border-purple-400/60 text-purple-100 text-xs sm:text-sm font-medium transition flex items-center justify-between"
+          >
+            <span>💌 Apology Letter</span>
+            <span class="check-icon hidden text-purple-300 font-bold">✓</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="selectVoucher(this, 'Hangout 🎬')"
+            class="voucher-btn text-left p-3 rounded-2xl border border-purple-400/25 bg-purple-950/60 hover:border-purple-400/60 text-purple-100 text-xs sm:text-sm font-medium transition flex items-center justify-between"
+          >
+            <span>🎬 Hangout</span>
+            <span class="check-icon hidden text-purple-300 font-bold">✓</span>
+          </button>
+
+          <button
+            id="btn-custom-voucher"
+            type="button"
+            onclick="selectVoucher(this, 'Custom ✨', true)"
+            class="voucher-btn text-left p-3 rounded-2xl border border-purple-400/25 bg-purple-950/60 hover:border-purple-400/60 text-purple-100 text-xs sm:text-sm font-medium transition flex items-center justify-between"
+          >
+            <span>✨ Custom</span>
+            <span class="check-icon hidden text-purple-300 font-bold">✓</span>
+          </button>
+        </div>
+
+        <!-- Custom Voucher Input (Shown when Custom is selected or typed) -->
+        <div id="custom-voucher-wrapper" class="hidden mt-2">
+          <input
+            id="custom-voucher-input"
+            type="text"
+            oninput="setCustomVoucher(this.value)"
+            placeholder="Type your custom peace offering here..."
+            class="w-full text-xs sm:text-sm bg-purple-950/90 border border-purple-400/50 rounded-xl px-3.5 py-2.5 text-white placeholder:text-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          />
+        </div>
+      </div>
+
+      <!-- NEW: Redeem & Schedule Your Voucher Booking Section -->
+      <div id="booking-section" class="mb-6 rounded-2xl bg-purple-950/70 border border-purple-400/35 p-4 sm:p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xs sm:text-sm font-mono font-semibold uppercase tracking-wider text-purple-200">
+            📅 Redeem & Schedule Your Voucher
+          </h3>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-fuchsia-500/20 text-fuchsia-200 border border-fuchsia-400/30">
+            Date Compulsory
+          </span>
+        </div>
+
+        <div class="space-y-3.5">
+          <!-- Compulsory Date -->
+          <div>
+            <label for="booking-date" class="block text-xs font-medium text-purple-200 mb-1">
+              Pick a Date <span class="text-fuchsia-300 font-semibold">(Required *)</span>
+            </label>
+            <input
+              id="booking-date"
+              type="date"
+              required
+              onchange="clearDateWarning()"
+              class="w-full text-xs sm:text-sm bg-purple-950/95 border border-purple-400/50 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+            />
+            <p id="date-warning-msg" class="hidden mt-1.5 text-xs font-medium text-fuchsia-300 bg-fuchsia-950/60 border border-fuchsia-400/40 rounded-lg px-3 py-1.5">
+              Hold on Donkey! Pick a date first so I know when to spoil you 💜
+            </p>
+          </div>
+
+          <!-- Optional Time & Optional Place -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="booking-time" class="block text-xs font-medium text-purple-200/90 mb-1">
+                Preferred Time <span class="text-purple-300/60">(Optional)</span>
+              </label>
+              <input
+                id="booking-time"
+                type="time"
+                class="w-full text-xs sm:text-sm bg-purple-950/95 border border-purple-400/35 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+              />
+              <span class="block text-[10px] text-purple-300/60 mt-1">Leave blank if flexible</span>
+            </div>
+
+            <div>
+              <label for="booking-place" class="block text-xs font-medium text-purple-200/90 mb-1">
+                Suggested Place / Spot <span class="text-purple-300/60">(Optional)</span>
+              </label>
+              <input
+                id="booking-place"
+                type="text"
+                placeholder="Leave blank for surprise"
+                class="w-full text-xs sm:text-sm bg-purple-950/95 border border-purple-400/35 rounded-xl px-3.5 py-2.5 text-white placeholder:text-purple-300/45 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+              />
+              <span class="block text-[10px] text-purple-300/60 mt-1">Favorite cafe, movies, anywhere</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Footer -->
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          onclick="goToStage(1)"
+          class="px-4 py-3.5 rounded-2xl border border-purple-400/30 bg-purple-950/70 hover:bg-purple-900 text-purple-200 text-sm font-medium transition"
+        >
+          ← Back
+        </button>
+        <button
+          type="button"
+          onclick="validateAndGoToStage3()"
+          class="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold text-sm sm:text-base shadow-lg shadow-purple-900/60 transition transform active:scale-[0.98]"
+        >
+          Lock In Booking & Continue →
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- STAGE 3: BACK TO 'US' OR STILL SAD? (FINALE)              -->
+    <!-- ========================================================= -->
+    <section id="stage-3" class="hidden glass-card rounded-3xl p-6 sm:p-8 text-center">
+
+      <!-- Initial Prompt View -->
+      <div id="treaty-prompt-view">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-3xl shadow-sm animate-float-slow">
+          🕊️
+        </div>
+
+        <span class="inline-block font-mono text-xs uppercase tracking-widest text-purple-300 font-semibold mb-2">
+          FINAL PROTOCOL
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">
+          Ready to Reboot Us, Donkey?
+        </h2>
+        <p class="text-sm sm:text-base text-purple-200/85 max-w-md mx-auto mb-5">
+          Your voucher & date are lined up below. Choose your verdict wisely!
+        </p>
+
+        <!-- Preview of Selected Voucher + Schedule -->
+        <div class="max-w-md mx-auto mb-6 p-4 rounded-2xl bg-gradient-to-r from-purple-950/85 to-violet-950/85 border border-dashed border-purple-400/50 text-left space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="font-mono text-[11px] uppercase tracking-wider text-purple-300">Selected Voucher</span>
+            <span class="text-xs text-purple-300">🎟️</span>
+          </div>
+          <p id="preview-voucher-label" class="font-bold text-white text-sm sm:text-base">
+            Treat of Ur Choice 🍔
+          </p>
+          <div class="pt-2 mt-2 border-t border-purple-400/20 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div>
+              <span class="text-purple-300/70 block font-mono text-[10px]">DATE</span>
+              <span id="preview-date-label" class="text-purple-100 font-medium">—</span>
+            </div>
+            <div>
+              <span class="text-purple-300/70 block font-mono text-[10px]">TIME</span>
+              <span id="preview-time-label" class="text-purple-100 font-medium">Flexible / Anytime</span>
+            </div>
+            <div>
+              <span class="text-purple-300/70 block font-mono text-[10px]">PLACE</span>
+              <span id="preview-place-label" class="text-purple-100 font-medium">Surprise / Up to us</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Playful Error Alert Banner (Triggered when "Still Sad 😢" is clicked) -->
+        <div
+          id="still-sad-error-box"
+          class="hidden max-w-md mx-auto mb-5 rounded-2xl bg-fuchsia-950/85 border-2 border-fuchsia-400/70 p-4 text-left shadow-lg shadow-fuchsia-950/60"
+        >
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="font-mono text-xs font-bold text-fuchsia-300 tracking-wide">
+              ERROR 404: 'STILL SAD' NOT SUPPORTED! 🚫💜
+            </span>
+            <span class="text-xs font-mono text-fuchsia-300/80">ERR_SAD_BLOCKED</span>
+          </div>
+          <p id="still-sad-error-text" class="text-xs sm:text-sm text-purple-100 leading-relaxed">
+            System Error: <code class="font-mono text-fuchsia-200">Sadness.exe</code> has crashed. Donkey is officially prohibited from staying sad. Please reboot by clicking <strong>"Back to 'Us' ✨💜"</strong>!
+          </p>
+        </div>
+
+        <!-- Two Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            type="button"
+            onclick="acceptTreaty()"
+            class="w-full sm:w-auto flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold text-sm sm:text-base shadow-[0_0_24px_rgba(168,85,247,0.55)] transition transform active:scale-[0.98]"
+          >
+            Back to 'Us' ✨💜
+          </button>
+
+          <button
+            type="button"
+            onclick="triggerStillSadError()"
+            class="w-full sm:w-auto py-3.5 px-5 rounded-2xl bg-purple-950/70 hover:bg-purple-900/80 border border-purple-400/30 text-purple-300/90 font-medium text-sm sm:text-base transition"
+          >
+            Still Sad 😢
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onclick="goToStage(2)"
+          class="mt-5 text-xs text-purple-300/70 hover:text-purple-200 underline underline-offset-4"
+        >
+          ← Edit note or booking details
+        </button>
+      </div>
+
+      <!-- Outcome A: Accepted Confirmation Screen -->
+      <div id="treaty-accepted-view" class="hidden animate-pop-in">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-500/25 border border-purple-400/40 text-purple-200 flex items-center justify-center text-4xl shadow-[0_0_30px_rgba(192,132,252,0.4)]">
+          💜
+        </div>
+
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-200 font-mono text-xs font-semibold mb-3">
+          <span>● US_STATUS: RESTORED // 100%</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-fuchsia-200 to-white mb-2">
+          YAYYY GOOD BOY, I LOVE YOUUU SANTA 💜🎉
+        </h2>
+        <p class="text-sm sm:text-base text-purple-200/85 max-w-md mx-auto mb-6">
+          Peace treaty officially locked in! Screenshot this pass or copy your booking details below and send it to me so we make it happen.
+        </p>
+
+        <!-- Official Redeemable Voucher & Booking Pass -->
+        <div class="max-w-md mx-auto rounded-2xl bg-purple-950/90 border-2 border-purple-400/70 p-5 shadow-lg shadow-purple-950/80 text-left relative overflow-hidden mb-6">
+          <div class="flex items-center justify-between border-b border-dashed border-purple-400/35 pb-3 mb-3.5">
+            <div>
+              <span class="font-mono text-[10px] uppercase tracking-widest text-purple-300 font-bold block">OFFICIAL PEACE TREATY & VOUCHER PASS</span>
+              <h3 id="final-voucher-title" class="text-base sm:text-lg font-bold text-white mt-0.5">
+                Treat of Ur Choice 🍔
+              </h3>
+            </div>
+            <span class="text-2xl">🎟️</span>
+          </div>
+
+          <!-- Confirmed Date, Time & Place Details -->
+          <div class="space-y-2 text-xs sm:text-sm mb-4">
+            <div class="flex items-center justify-between bg-purple-900/40 rounded-xl px-3 py-2 border border-purple-400/20">
+              <span class="font-mono text-[11px] text-purple-300">📅 DATE</span>
+              <span id="final-booking-date" class="font-semibold text-white">—</span>
+            </div>
+            <div class="flex items-center justify-between bg-purple-900/40 rounded-xl px-3 py-2 border border-purple-400/20">
+              <span class="font-mono text-[11px] text-purple-300">⏰ TIME</span>
+              <span id="final-booking-time" class="font-semibold text-purple-100">Flexible / Anytime</span>
+            </div>
+            <div class="flex items-center justify-between bg-purple-900/40 rounded-xl px-3 py-2 border border-purple-400/20">
+              <span class="font-mono text-[11px] text-purple-300">📍 PLACE</span>
+              <span id="final-booking-place" class="font-semibold text-purple-100">Surprise / Up to us</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-purple-300/80 font-mono pt-2 border-t border-purple-400/20">
+            <span>HOLDER: DONKEY / SANTA 💜</span>
+            <span id="signed-date" class="text-purple-300 font-semibold">SIGNED ✓</span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onclick="copyBookingDetails()"
+            class="px-5 py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs sm:text-sm font-semibold shadow-md shadow-purple-900/60 transition flex items-center gap-1.5"
+          >
+            <span>Copy Booking Details 📋</span>
+          </button>
+          <button
+            type="button"
+            onclick="launchConfetti()"
+            class="px-4 py-3 rounded-2xl bg-purple-600/35 hover:bg-purple-600/50 border border-purple-400/40 text-purple-100 text-xs sm:text-sm font-semibold transition"
+          >
+            More Hearts 💜
+          </button>
+          <button
+            type="button"
+            onclick="resetTreatyPrompt()"
+            class="px-4 py-3 rounded-2xl bg-purple-950/80 hover:bg-purple-900 border border-purple-400/25 text-purple-200 text-xs sm:text-sm font-medium transition"
+          >
+            Back
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Subtle Footer -->
+  <footer id="bottom-footer" class="w-full max-w-xl text-center mt-6 text-xs text-purple-300/60">
+    Built with zero pride & 100% appreciation for you.
+  </footer>
+
+  <!-- ========================================================= -->
+  <!-- JAVASCRIPT LOGIC                                          -->
+  <!-- ========================================================= -->
+  <script>
+    // --- State Management ---
+    const bugsData = [
+      {
+        id: 1,
+        label: "Stubbornness.exe",
+        emoji: "🧱",
+        thought: "💭 Honest thought #1: I got stubborn for no good reason.",
+        animClass: "animate-float-slow"
+      },
+      {
+        id: 2,
+        label: "Overthinking Loop",
+        emoji: "🌀",
+        thought: "💭 Honest thought #2: You tried so hard to bring things together.",
+        animClass: "animate-float-med"
+      },
+      {
+        id: 3,
+        label: "Silly Argument",
+        emoji: "⚡",
+        thought: "💭 Honest thought #3: It was over something so silly—you didn’t deserve a fight.",
+        animClass: "animate-float-fast"
+      },
+      {
+        id: 4,
+        label: "Defensive Shield",
+        emoji: "🛡️",
+        thought: "💭 Honest thought #4: You mean way more to me than winning an argument.",
+        animClass: "animate-float-slow"
+      },
+      {
+        id: 5,
+        label: "Unnecessary Pride",
+        emoji: "🎈",
+        thought: "💭 Honest thought #5: Peace with you > my pride, every single time.",
+        animClass: "animate-float-med"
+      }
+    ];
+
+    let clearedCount = 0;
+    let selectedVoucher = "Treat of Ur Choice 🍔";
+    let isEditing = false;
+    let isCleanView = false;
+    let sadClickCount = 0;
+
+    // --- Initialize Mini-Game Nodes ---
+    function renderBugs() {
+      const arena = document.getElementById("bugs-arena");
+      arena.innerHTML = "";
+
+      bugsData.forEach((bug) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.id = `bug-node-${bug.id}`;
+        btn.className = `bug-node ${bug.animClass} px-4 py-3 rounded-2xl bg-purple-950/90 border border-purple-400/40 shadow-md shadow-purple-950/60 hover:border-purple-300 flex items-center gap-2 text-xs sm:text-sm font-semibold text-purple-100 cursor-pointer`;
+        btn.innerHTML = `
+          <span class="text-base sm:text-lg">${bug.emoji}</span>
+          <span>${bug.label}</span>
+          <span class="ml-1 text-[10px] font-mono text-purple-200 bg-purple-600/40 px-1.5 py-0.5 rounded-md">×</span>
+        `;
+        btn.onclick = () => popBug(bug.id, bug.thought);
+        arena.appendChild(btn);
+      });
+    }
+
+    // --- Pop a Stubbornness Bug ---
+    function popBug(id, thought) {
+      const node = document.getElementById(`bug-node-${id}`);
+      if (!node || node.classList.contains("bug-cleared")) return;
+
+      node.classList.add("bug-cleared");
+      clearedCount++;
+
+      // Update counter and progress bar
+      document.getElementById("bug-counter").textContent = `${clearedCount} / ${bugsData.length} CLEARED`;
+      const pct = (clearedCount / bugsData.length) * 100;
+      document.getElementById("bug-progress-bar").style.width = `${pct}%`;
+
+      // Reveal honest thought
+      const thoughtBox = document.getElementById("thoughts-reveal-box");
+      const thoughtText = document.getElementById("latest-thought-text");
+      thoughtText.textContent = thought;
+      thoughtBox.classList.remove("bg-purple-950/60", "border-purple-400/25");
+      thoughtBox.classList.add("bg-purple-600/25", "border-purple-400/50");
+
+      // Check if all cleared
+      if (clearedCount === bugsData.length) {
+        setTimeout(() => {
+          const arena = document.getElementById("bugs-arena");
+          arena.innerHTML = `
+            <div class="text-center py-6 animate-pop-in">
+              <div class="text-4xl mb-2">💜</div>
+              <p class="font-bold text-white text-base sm:text-lg">All Stubbornness Bugs Cleared!</p>
+              <p class="text-xs sm:text-sm text-purple-200/80 mt-1">System ready for sincere communication.</p>
+            </div>
+          `;
+          document.getElementById("stage-1-complete").classList.remove("hidden");
+          updateStatusBadge("READY TO REBOOT", "bg-purple-400");
+        }, 320);
+      }
+    }
+
+    // --- Stage Navigation ---
+    function goToStage(stageNum) {
+      // Save edits automatically if leaving edit mode
+      if (isEditing) {
+        toggleEditMode(false);
+      }
+
+      [1, 2, 3].forEach((num) => {
+        const sec = document.getElementById(`stage-${num}`);
+        const pip = document.getElementById(`pip-${num}`);
+        if (num === stageNum) {
+          sec.classList.remove("hidden");
+          sec.classList.add("animate-pop-in");
+          pip.classList.remove("bg-purple-950/80", "bg-purple-400/60");
+          pip.classList.add("bg-purple-500");
+        } else {
+          sec.classList.add("hidden");
+          pip.classList.remove("bg-purple-500");
+          pip.classList.add(num < stageNum ? "bg-purple-400/60" : "bg-purple-950/80");
+        }
+      });
+
+      if (stageNum === 3) {
+        resetTreatyPrompt();
+        const details = getFormattedBookingDetails();
+        document.getElementById("preview-voucher-label").textContent = selectedVoucher;
+        document.getElementById("preview-date-label").textContent = details.dateDisplay;
+        document.getElementById("preview-time-label").textContent = details.timeDisplay;
+        document.getElementById("preview-place-label").textContent = details.placeDisplay;
+      }
+    }
+
+    // --- Booking Validation & Helpers ---
+    function validateAndGoToStage3() {
+      const dateInput = document.getElementById("booking-date");
+      const warningMsg = document.getElementById("date-warning-msg");
+      const bookingSection = document.getElementById("booking-section");
+
+      if (!dateInput.value) {
+        warningMsg.classList.remove("hidden");
+        dateInput.classList.add("border-fuchsia-400", "ring-2", "ring-fuchsia-400/60");
+        bookingSection.classList.remove("animate-shake");
+        void bookingSection.offsetWidth; // trigger reflow to restart shake
+        bookingSection.classList.add("animate-shake");
+        dateInput.focus();
+        showToast("Pick a date first, Donkey! 📅💜");
+        return;
+      }
+
+      clearDateWarning();
+      goToStage(3);
+    }
+
+    function clearDateWarning() {
+      const dateInput = document.getElementById("booking-date");
+      const warningMsg = document.getElementById("date-warning-msg");
+      warningMsg.classList.add("hidden");
+      dateInput.classList.remove("border-fuchsia-400", "ring-2", "ring-fuchsia-400/60");
+    }
+
+    function getFormattedBookingDetails() {
+      const rawDate = document.getElementById("booking-date").value;
+      const rawTime = document.getElementById("booking-time").value;
+      const rawPlace = document.getElementById("booking-place").value.trim();
+
+      let dateDisplay = "Not set";
+      if (rawDate) {
+        const parts = rawDate.split("-");
+        const dateObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        dateDisplay = dateObj.toLocaleDateString(undefined, {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        });
+      }
+
+      let timeDisplay = "Flexible / Anytime";
+      if (rawTime) {
+        const [hoursStr, mins] = rawTime.split(":");
+        let hours = parseInt(hoursStr, 10);
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12 || 12;
+        timeDisplay = `${hours}:${mins} ${ampm}`;
+      }
+
+      const placeDisplay = rawPlace || "Surprise / Up to us";
+
+      return { dateDisplay, timeDisplay, placeDisplay };
+    }
+
+    // --- Toggle Edit Mode in Stage 2 ---
+    function toggleEditMode(forceState) {
+      isEditing = typeof forceState === "boolean" ? forceState : !isEditing;
+
+      const dispGreeting = document.getElementById("display-greeting");
+      const inpGreeting = document.getElementById("input-greeting");
+      const dispMsg = document.getElementById("display-message");
+      const inpMsg = document.getElementById("input-message");
+      const label = document.getElementById("edit-toggle-label");
+
+      if (isEditing) {
+        dispGreeting.classList.add("hidden");
+        inpGreeting.classList.remove("hidden");
+        dispMsg.classList.add("hidden");
+        inpMsg.classList.remove("hidden");
+        label.textContent = "Save Note";
+        inpMsg.focus();
+      } else {
+        dispGreeting.textContent = inpGreeting.value.trim() || "Hey Donkey, I’m really sorry. 💜";
+        dispMsg.textContent = inpMsg.value.trim();
+        dispGreeting.classList.remove("hidden");
+        inpGreeting.classList.add("hidden");
+        dispMsg.classList.remove("hidden");
+        inpMsg.classList.add("hidden");
+        label.textContent = "Edit Message";
+        showToast("Apology note updated!");
+      }
+    }
+
+    // --- Voucher Selection ---
+    function selectVoucher(btnElement, voucherText, isCustom = false) {
+      const customWrapper = document.getElementById("custom-voucher-wrapper");
+      const customInput = document.getElementById("custom-voucher-input");
+
+      if (isCustom) {
+        customWrapper.classList.remove("hidden");
+        customInput.focus();
+        selectedVoucher = customInput.value.trim() ? customInput.value.trim() : "Custom Peace Offering ✨";
+      } else {
+        customWrapper.classList.add("hidden");
+        customInput.value = "";
+        selectedVoucher = voucherText;
+      }
+
+      document.querySelectorAll(".voucher-btn").forEach((btn) => {
+        btn.classList.remove("border-2", "border-purple-400", "bg-purple-600/35", "text-white", "shadow-sm", "shadow-purple-900/40");
+        btn.classList.add("border", "border-purple-400/25", "bg-purple-950/60", "text-purple-100");
+        btn.querySelector(".check-icon").classList.add("hidden");
+      });
+
+      btnElement.classList.remove("border", "border-purple-400/25", "bg-purple-950/60", "text-purple-100");
+      btnElement.classList.add("border-2", "border-purple-400", "bg-purple-600/35", "text-white", "shadow-sm", "shadow-purple-900/40");
+      btnElement.querySelector(".check-icon").classList.remove("hidden");
+    }
+
+    function setCustomVoucher(val) {
+      if (val.trim().length > 0) {
+        selectedVoucher = val.trim();
+      } else {
+        selectedVoucher = "Custom Peace Offering ✨";
+      }
+    }
+
+    // --- Stage 3 Outcomes ---
+    function acceptTreaty() {
+      const details = getFormattedBookingDetails();
+      document.getElementById("treaty-prompt-view").classList.add("hidden");
+      document.getElementById("treaty-accepted-view").classList.remove("hidden");
+
+      document.getElementById("final-voucher-title").textContent = selectedVoucher;
+      document.getElementById("final-booking-date").textContent = details.dateDisplay;
+      document.getElementById("final-booking-time").textContent = details.timeDisplay;
+      document.getElementById("final-booking-place").textContent = details.placeDisplay;
+
+      const today = new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      document.getElementById("signed-date").textContent = `SIGNED ${today.toUpperCase()} ✓`;
+
+      updateStatusBadge("BACK TO US 💜", "bg-purple-400");
+      launchConfetti();
+    }
+
+    function triggerStillSadError() {
+      sadClickCount++;
+      const errorBox = document.getElementById("still-sad-error-box");
+      const errorText = document.getElementById("still-sad-error-text");
+
+      const funnyMessages = [
+        `System Error: <code class="font-mono text-fuchsia-200">Sadness.exe</code> has crashed. Donkey is officially prohibited from staying sad. Please reboot by clicking <strong>"Back to 'Us' ✨💜"</strong>!`,
+        `Warning #${sadClickCount}: Nice try, Donkey! That button is strictly decorative. Your only valid option is <strong>"Back to 'Us' ✨💜"</strong>!`,
+        `Critical Override: Too many cuddles & vouchers pending to allow sadness. Click <strong>"Back to 'Us' ✨💜"</strong> to claim your treat!`
+      ];
+
+      errorText.innerHTML = funnyMessages[(sadClickCount - 1) % funnyMessages.length];
+      errorBox.classList.remove("hidden", "animate-shake");
+      void errorBox.offsetWidth; // trigger reflow for repeated shake
+      errorBox.classList.add("animate-shake");
+
+      updateStatusBadge("ERROR 404 // SAD BLOCKED", "bg-fuchsia-400");
+    }
+
+    function resetTreatyPrompt() {
+      document.getElementById("treaty-accepted-view").classList.add("hidden");
+      document.getElementById("still-sad-error-box").classList.add("hidden");
+      document.getElementById("treaty-prompt-view").classList.remove("hidden");
+    }
+
+    function updateStatusBadge(text, dotColorClass) {
+      document.getElementById("status-label").textContent = `STATUS: ${text}`;
+      const dot = document.getElementById("status-dot");
+      dot.className = `w-2.5 h-2.5 rounded-full ${dotColorClass}`;
+    }
+
+    // --- Screenshot / Clean View Mode ---
+    function toggleScreenshotMode() {
+      isCleanView = !isCleanView;
+      const topBar = document.getElementById("top-bar");
+      const exitBtn = document.getElementById("clean-view-exit");
+      const footer = document.getElementById("bottom-footer");
+      const stepIndicator = document.getElementById("step-indicator");
+
+      if (isCleanView) {
+        topBar.classList.add("hidden");
+        footer.classList.add("hidden");
+        stepIndicator.classList.add("opacity-0");
+        exitBtn.classList.remove("hidden");
+      } else {
+        topBar.classList.remove("hidden");
+        footer.classList.remove("hidden");
+        stepIndicator.classList.remove("opacity-0");
+        exitBtn.classList.add("hidden");
+      }
+    }
+
+    // --- Copy Note to Clipboard (iFrame safe) ---
+    function copyApologySummary() {
+      const greeting = document.getElementById("input-greeting").value.trim();
+      const message = document.getElementById("input-message").value.trim();
+      const details = getFormattedBookingDetails();
+      const dateLine = document.getElementById("booking-date").value ? `\n📅 Date: ${details.dateDisplay} (${details.timeDisplay}) @ ${details.placeDisplay}` : "";
+      const fullText = `${greeting}\n\n${message}\n\n🕊️ Peace Offering Voucher: ${selectedVoucher}${dateLine}`;
+
+      copyTextToClipboard(fullText, "Apology & voucher copied to paste!");
+    }
+
+    // --- Copy Confirmed Booking Pass Details ---
+    function copyBookingDetails() {
+      const details = getFormattedBookingDetails();
+      const bookingSummary = [
+        "YAYYY GOOD BOY, I LOVE YOUUU SANTA 💜🎉",
+        "Peace Treaty Accepted! Here is my voucher booking:",
+        `🎟️ Voucher: ${selectedVoucher}`,
+        `📅 Date: ${details.dateDisplay}`,
+        `⏰ Time: ${details.timeDisplay}`,
+        `📍 Place: ${details.placeDisplay}`
+      ].join("\n");
+
+      copyTextToClipboard(bookingSummary, "Booking details copied! Paste & send to her 💜");
+    }
+
+    function copyTextToClipboard(text, successMsg) {
+      const tempTextarea = document.createElement("textarea");
+      tempTextarea.value = text;
+      tempTextarea.style.position = "fixed";
+      tempTextarea.style.opacity = "0";
+      document.body.appendChild(tempTextarea);
+      tempTextarea.select();
+
+      try {
+        document.execCommand("copy");
+        showToast(successMsg);
+      } catch (err) {
+        showToast("Could not copy automatically.");
+      }
+      document.body.removeChild(tempTextarea);
+    }
+
+    // --- Toast Notification Helper ---
+    let toastTimeout;
+    function showToast(msg) {
+      const banner = document.getElementById("toast-banner");
+      document.getElementById("toast-text").textContent = msg;
+      banner.classList.remove("opacity-0", "translate-y-2");
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        banner.classList.add("opacity-0", "translate-y-2");
+      }, 2600);
+    }
+
+    // --- Celebration Confetti & Floating Hearts Engine ---
+    const canvas = document.getElementById("celebration-canvas");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+    let animFrameId = null;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function launchConfetti() {
+      const shapes = ["💜", "🔮", "✨", "🕊️", "💫"];
+      const colors = ["#A855F7", "#C084FC", "#9333EA", "#E879F9", "#818CF8"];
+
+      for (let i = 0; i < 60; i++) {
+        const isEmoji = Math.random() > 0.4;
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: canvas.height + 20 + Math.random() * 120,
+          vx: (Math.random() - 0.5) * 3.5,
+          vy: -(Math.random() * 4.5 + 3.2),
+          size: isEmoji ? Math.random() * 14 + 14 : Math.random() * 7 + 5,
+          emoji: shapes[Math.floor(Math.random() * shapes.length)],
+          color: colors[Math.floor(Math.random() * colors.length)],
+          isEmoji,
+          rotation: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 6,
+          alpha: 1
+        });
+      }
+
+      if (!animFrameId) {
+        animateParticles();
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.04; // gentle gravity
+        p.rotation += p.vRot;
+        if (p.y < canvas.height * 0.25) {
+          p.alpha -= 0.012;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+
+        if (p.isEmoji) {
+          ctx.font = `${p.size}px sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(p.emoji, 0, 0);
+        } else {
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        }
+        ctx.restore();
+      });
+
+      particles = particles.filter((p) => p.alpha > 0 && p.y < canvas.height + 160);
+
+      if (particles.length > 0) {
+        animFrameId = requestAnimationFrame(animateParticles);
+      } else {
+        animFrameId = null;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    // Boot on window load
+    window.onload = function () {
+      renderBugs();
+    };
+  </script>
+</body>
+</html>
